@@ -1,6 +1,6 @@
 # Requirements
--Nodejs
--NPM
+`Nodejs`
+`NPM`
 
 # Installation
 `git clone this project`
@@ -11,3 +11,6 @@
 
 # fuzzy.js
     The fuzzy logic
+
+# Config.js
+    The setup for rule and membership function
