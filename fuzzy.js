@@ -2,7 +2,7 @@ const fuzzify = (crispSet, inputs) => {
   // console.log(crispSet)
   const fuzzySets = crispSet.map((val, i) => {
     const sets = inputs[i].sets
-    console.log('sets:', sets)
+    // console.log('sets:', sets)
     const results = sets.map(set => {
       if (val < set[0]) return 0
       else if (val < set[1]) {
@@ -21,8 +21,8 @@ const fuzzify = (crispSet, inputs) => {
 }
 
 const findX = (y, input) => {
-  console.log('findx', y)
-  console.log('input', input)
+  // console.log('findx', y)
+  // console.log('input', input)
   return [0]
 }
 
@@ -38,11 +38,11 @@ module.exports = {
       const outputs = inputRule.map((input, index) => {
         return fuzzySets[index][input]
       })
-      console.log('input', outputs)
+      // console.log('input', outputs)
       const min = Math.min(...outputs)
       const outputRule = rule[rule.length - 1]
-      console.log('min', min)
-      console.log(outputRule)
+      // console.log('min', min)
+      // console.log(outputRule)
       const outputFuzzy = {
         value: min,
         rule: outputRule
@@ -65,7 +65,7 @@ module.exports = {
     const values = output.sets.map((set, i) => {
       let coordinates = []
       const y = results[i]
-      console.log(set, y)
+      // console.log(set, y)
       if (y === 0) {
         return 0
       }
@@ -97,11 +97,13 @@ module.exports = {
       return coordinates
     })
 
-    console.log('start find centroid')
+    // console.log('start find centroid')
+    let dominate = true
     let max = 0
     let min = 0
     values.forEach(value => {
       if (value instanceof Array) {
+        dominate = false
         value.forEach(val => {
           if (val[0] > max) {
             max = val[0]
@@ -112,43 +114,57 @@ module.exports = {
         })
       }
     })
-    
-    let area = 0
-    let xfx = 0
-    const step = 0.1
-    for (let i = min; i <= max; i += step) {
-      let points
-      values.forEach(value => {
-        if (value) {
-          // console.log(value)
-          for (let k = 0; k < value.length; k++) {
-            const currentValue = value[k]
-            const nextValue = value[k+1]
 
-            if (currentValue && nextValue) {
-              if (i >= currentValue[0] && i <= nextValue[0]) {
-                points = [currentValue, nextValue]
-              }
-            }
-
-          }
-        }
-        if (points) {
-          // console.log(i, points)
-          const y1 = points[0][1]
-          const y2 = points[1][1]
-          const x1 = points[0][0]
-          const x2 = points[1][0]
-          const m = (y2 - y1)/(x2 - x1)
-          const c = y1 - m * x1
-          let y = m*i + c
-          xfx += i*y
-          area += y
-          // console.log(i, y)
+    if (dominate) {
+      let dominateArea = 0
+      values.forEach((value, index) => {
+        if (value === 1) {
+          let sets = output.sets[index]
+          let area = 0.5 * (sets[2] + sets[1])
+          dominateArea = area
         }
       })
+      return dominateArea
     }
-
-    return xfx / area
+    
+    else {
+      let area = 0
+      let xfx = 0
+      const step = 0.1
+      for (let i = min; i <= max; i += step) {
+        let points
+        values.forEach(value => {
+          if (value) {
+            // console.log(value)
+            for (let k = 0; k < value.length; k++) {
+              const currentValue = value[k]
+              const nextValue = value[k+1]
+  
+              if (currentValue && nextValue) {
+                if (i >= currentValue[0] && i <= nextValue[0]) {
+                  points = [currentValue, nextValue]
+                }
+              }
+  
+            }
+          }
+          if (points) {
+            // console.log(i, points)
+            const y1 = points[0][1]
+            const y2 = points[1][1]
+            const x1 = points[0][0]
+            const x2 = points[1][0]
+            const m = (y2 - y1)/(x2 - x1)
+            const c = y1 - m * x1
+            let y = m*i + c
+            xfx += i*y
+            area += y
+            // console.log(i, y)
+          }
+        })
+      }
+  
+      return xfx / area
+    }
   }
 }
